@@ -1,14 +1,40 @@
-import { test, expect, describe } from "@jest/globals";
-// const sum = (a: number, b: number) => a + b;
+import { test, expect, describe, it } from "@jest/globals";
+import request from "supertest";
 
-// describe("sum moduel", () => {
-//   test("adds 1 + 2 to equal 3", () => {
-//     expect(sum(1, 2)).toBe(3);
-//   });
-// });
+const SELF_URL = "http://localhost:5000";
 
-import { sum } from "./sum";
+describe("user api test", () => {
+  it("get user method should return status 200 code", async () => {
+    return request(SELF_URL)
+      .post("/graphql")
+      .send({
+        query: `{
+              user {
+                id
+                message
+              }
+            }`,
+      })
+      .expect(200);
+  });
 
-test("adds 1 + 2 to equal 3", () => {
-  expect(sum(1, 2)).toBe(3);
+  it("update user method should return updated message", async () => {
+    return request(SELF_URL)
+      .post("/graphql")
+      .send({
+        query: `
+            mutation {
+                updateUser(message: "Updated message") {
+                  message
+                }
+              },
+        `,
+      })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.data.updateUser.message).toBe(
+          "manual - Updated message"
+        );
+      });
+  });
 });
